@@ -144,14 +144,7 @@ int main(int argc, char* argv[])
 		}
 		else if(opcija == 4){
 			//=======================================================================================================================================================	
-	/*
-	Upit unosi novog modela u tabelu
-	INSERT INTO Osoba(jmbg, ime, prezime, adresa, telefon)
-	VALUES([jmbg],[ime],[prezime],[adresa],[telefon]);
 
-	INSERT INTO Model(Osoba_jmbg, bmi, obim, tezina, visina)
-	VALUES([jmbg],[bmi],[obim],[tezina],[visina]);
-	*/
 		printf("Unesite jmbg modela:");
 		scanf("%s", jmbg_modela);
 		
@@ -237,8 +230,7 @@ int main(int argc, char* argv[])
 	}
 	else if(opcija == 5){
 	//=======================================================================================================================================================	
-		/*UPDATE Modna_revija SET Mesto_odrzavanja_ptt = [ptt];
-		UPDATE Mesto_odrzavanja SET ptt = [ptt], adresa = [adresa], mesto = [mesto];*/
+
 			printf("Unesite id modne revije ciju lokaciju zelite da promenite: \n");
 			scanf("%d", &id_revije);
 			printf("Unesite ptt mesta u kome zelite da se odrzava modna revija:\n");
@@ -246,10 +238,8 @@ int main(int argc, char* argv[])
 			
 			sprintf(query, "UPDATE Modna_revija SET Mesto_odrzavanja_ptt = %d WHERE id = %d;", ptt, id_revije);
 
-				if (mysql_query (connection, query) != 0)
-					error_fatal ("Greska u upitu %s\n", mysql_error (connection));
-			
-		
+			if (mysql_query (connection, query) != 0)
+				error_fatal ("Greska u upitu %s\n", mysql_error (connection));
 		
 	}
 	else if(opcija == 6){
