@@ -57,11 +57,14 @@ int main(int argc, char* argv[])
 		error_fatal ("Greska u konekciji. %s\n", mysql_error (connection));
 	
 	while(1){
+		
 		printf("Odaberite sta zelite:\n");
-		printf("1. Spisak gostiju na odredjenoj reviji\n2. Spisak i informacije o reviji na kojima je predstavljena odredjena kolekcija\n3. Dostupne haljine za odredjenu kolekciju\n");
-		printf("4. Unos novih modela, unajmljivanje modela, dodela haljina\n5. Promena mesta odrzavanja revije\n6. Spisak modela na odredjenoj reviji\n7. Izlaz\n");
+		printf("1. Spisak gostiju na odredjenoj reviji\n2. Spisak i informacije o reviji na kojima je predstavljena odredjena kolekcija\n3. Spisak modela na odredjenoj reviji\n");
+		printf("4. Unos novih modela, unajmljivanje modela, dodela haljina\n5.Dostupne haljine za odredjenu kolekciju\n6. Promena mesta odrzavanja revije\n7. Izlaz\n");
 		scanf("%d", &opcija);
+		
 		if(opcija == 1){
+			/*Spisak gostiju na odredjenoj reviji*/
 	//=======================================================================================================================================================			
 			printf("Unesite id revije za koju zelite spisak gostiju: ");
 			scanf("%d", &id_revije);
@@ -89,6 +92,7 @@ int main(int argc, char* argv[])
 			
 		}
 		else if(opcija == 2){
+			/*Spisak i informacije o reviji na kojima je predstavljena odredjena kolekcija*/
 	//=======================================================================================================================================================			
 			printf("Unesite id kolekcije za informacije o revijama na kojima je kolekcija predstavljana: ");
 			scanf("%d", &id_kolekcije2);
@@ -116,6 +120,122 @@ int main(int argc, char* argv[])
 			
 		}
 		else if(opcija == 3){
+			/*Spisak modela na odredjenoj reviji*/
+	//=======================================================================================================================================================	
+			printf("Unesite id revije za koju zelite spisak modela: ");
+			scanf("%d", &id_revije);
+			
+			sprintf(query, "SELECT o.ime AS `ime modela`, o.prezime AS `prezime modela`, o.jmbg AS `jmbg modela` FROM Model m JOIN Osoba o ON m.Osoba_jmbg = o.jmbg JOIN Unajmljuje u ON u.Model_Osoba_jmbg = m.Osoba_jmbg WHERE u.Modna_revija_id = %d", id_revije);
+			
+			if (mysql_query (connection, query) != 0)
+				error_fatal ("Greska u upitu %s\n", mysql_error (connection));
+			
+			result = mysql_use_result (connection);
+			
+			field = mysql_fetch_field (result);
+			for(i = 0; i < mysql_field_count(connection); i++){
+				printf("%-20s", field[i].name);
+			}
+			printf("\n");
+			while ((row = mysql_fetch_row (result)) != 0){
+				for(i = 0; i < mysql_field_count(connection); i++){	
+					printf ("%-20s", row[i]);
+				}
+				printf ("\n");
+			}
+
+			mysql_free_result (result);
+	
+		}
+		else if(opcija == 4){
+			/* Unos novih modela, unajmljivanje modela, dodela haljina*/
+		//=======================================================================================================================================================	
+				printf("Unesite jmbg modela:");
+				scanf("%s", jmbg_modela);
+			
+				sprintf(query, "SELECT jmbg FROM Osoba o WHERE o.jmbg = '%s'", jmbg_modela);
+
+				if (mysql_query (connection, query) != 0)
+					error_fatal ("Greska u upitu %s\n", mysql_error (connection));
+
+					result = mysql_use_result (connection);
+
+				if(mysql_fetch_row(result) == NULL){
+						//trazi samo info za osobu
+						printf("Unesite ime i prezime: \n");
+						scanf("%s %s",ime_osobe, prezime_osobe);
+						
+						printf("Unesite telefon: \n");
+						scanf("%s", telefon_osobe);
+						getchar();
+						
+						printf("Unesite adresu: \n");
+						fgets(adresa_osobe, 45, stdin);
+						
+						sprintf(query, "INSERT INTO Osoba(jmbg, ime, prezime, adresa, telefon) VALUES('%s','%s','%s','%s','%s');", jmbg_modela, ime_osobe, prezime_osobe, adresa_osobe, telefon_osobe);
+
+						if (mysql_query (connection, query) != 0)
+							error_fatal ("Greska u upitu %s\n", mysql_error (connection));
+						
+				}
+				mysql_free_result (result);
+				
+				sprintf(query, "SELECT Osoba_jmbg FROM Model o WHERE o.Osoba_jmbg = '%s'", jmbg_modela);
+
+				if (mysql_query (connection, query) != 0)
+					error_fatal ("Greska u upitu %s\n", mysql_error (connection));
+
+				result = mysql_use_result (connection);
+				
+				if(mysql_fetch_row(result) == NULL ){
+					printf("Unesite bmi obim tezinu i visinu: \n");
+					scanf("%lf %lf %lf %lf", &bmi, &obim, &tezina, &visina);
+					
+					sprintf(query, "INSERT INTO Model(Osoba_jmbg, bmi, obim, tezina, visina) VALUES('%s',%lf,%lf,%lf,%lf);", jmbg_modela, bmi, obim, tezina, visina);
+
+					if (mysql_query (connection, query) != 0)
+						error_fatal ("Greska u upitu %s\n", mysql_error (connection));
+					
+					printf("Model uspesno unet!\n");
+				}
+				printf("Da li zelite da modela odmah unajmite za reviju? da/ne\n");
+				scanf("%s", odg);
+				
+				if(strcmp(odg, "da") == 0){
+					//unosimo u tabelu nosi 
+					printf("Unesite id revije i honorar:\n");
+					scanf("%d %d", &id_revije, &honorar);
+					
+					sprintf(query, "INSERT INTO Unajmljuje(Modna_revija_id, Model_Osoba_jmbg, honorar) VALUES(%d,'%s',%d);", id_revije,jmbg_modela,honorar);
+
+					if (mysql_query (connection, query) != 0)
+						error_fatal ("Greska u upitu %s\n", mysql_error (connection));
+					
+					printf("Model uspesno zaposlen na reviji!\n");
+				}
+				
+				printf("Da li zelite da modelu dodelite jednu ili vise haljina koje ce nositi tokom revije? da/ne brojhaljina\n");
+				scanf("%s %d", odg, &broj);
+				
+				if(strcmp(odg,"da") == 0){
+					printf("Unesite id revije\n");
+					scanf("%d", &id_revije);
+					for(i = 0; i < broj; i++){
+						printf("Unesite id postojece haljine: ");
+						scanf("%d",&id_haljine);
+						sprintf(query, "INSERT INTO Nosi(Unajmljuje_Model_Osoba_jmbg, Unajmljuje_Modna_revija_id, Haljina_id) VALUES ('%s',%d,%d);", jmbg_modela,id_revije, id_haljine);
+
+						if (mysql_query (connection, query) != 0)
+							error_fatal ("Greska u upitu %s\n", mysql_error (connection));
+						printf("Haljina uspesno dodeljena\n");	
+					}
+				}
+				
+				mysql_free_result (result);
+			
+		}
+		else if(opcija == 5){
+			/*Dostupne haljine za odredjenu kolekciju*/
 	//=======================================================================================================================================================	
 			printf("Unesite id kolekcije i godinu kolekcije za informacije o haljinama dostupnim: ");
 			scanf("%d %d", &id_kolekcije, &god_kolekcije);
@@ -140,143 +260,29 @@ int main(int argc, char* argv[])
 			}
 
 			mysql_free_result (result);
-			
+	
 		}
-		else if(opcija == 4){
-			//=======================================================================================================================================================	
-
-		printf("Unesite jmbg modela:");
-		scanf("%s", jmbg_modela);
-		
-		sprintf(query, "SELECT jmbg FROM Osoba o WHERE o.jmbg = '%s'", jmbg_modela);
-
-		if (mysql_query (connection, query) != 0)
-			error_fatal ("Greska u upitu %s\n", mysql_error (connection));
-
-		result = mysql_use_result (connection);
-
-		if(mysql_fetch_row(result) == NULL){
-				//trazi samo info za osobu
-				printf("Unesite ime i prezime: \n");
-				scanf("%s %s",ime_osobe, prezime_osobe);
-				
-				printf("Unesite telefon: \n");
-				scanf("%s", telefon_osobe);
-				getchar();
-				
-				printf("Unesite adresu: \n");
-				fgets(adresa_osobe, 45, stdin);
-				
-				sprintf(query, "INSERT INTO Osoba(jmbg, ime, prezime, adresa, telefon) VALUES('%s','%s','%s','%s','%s');", jmbg_modela, ime_osobe, prezime_osobe, adresa_osobe, telefon_osobe);
-
-				if (mysql_query (connection, query) != 0)
-					error_fatal ("Greska u upitu %s\n", mysql_error (connection));
-				
-		}
-		mysql_free_result (result);
-		
-		sprintf(query, "SELECT Osoba_jmbg FROM Model o WHERE o.Osoba_jmbg = '%s'", jmbg_modela);
-
-		if (mysql_query (connection, query) != 0)
-			error_fatal ("Greska u upitu %s\n", mysql_error (connection));
-
-		result = mysql_use_result (connection);
-		
-		if(mysql_fetch_row(result) == NULL ){
-			printf("Unesite bmi obim tezinu i visinu: \n");
-			scanf("%lf %lf %lf %lf", &bmi, &obim, &tezina, &visina);
-			
-			sprintf(query, "INSERT INTO Model(Osoba_jmbg, bmi, obim, tezina, visina) VALUES('%s',%lf,%lf,%lf,%lf);", jmbg_modela, bmi, obim, tezina, visina);
-
-			if (mysql_query (connection, query) != 0)
-				error_fatal ("Greska u upitu %s\n", mysql_error (connection));
-			
-			printf("Model uspesno unet!\n");
-		}
-		printf("Da li zelite da modela odmah unajmite za reviju? da/ne\n");
-		scanf("%s", odg);
-		
-		if(strcmp(odg, "da") == 0){
-			//unosimo u tabelu nosi 
-			printf("Unesite id revije i honorar:\n");
-			scanf("%d %d", &id_revije, &honorar);
-			
-			sprintf(query, "INSERT INTO Unajmljuje(Modna_revija_id, Model_Osoba_jmbg, honorar) VALUES(%d,'%s',%d);", id_revije,jmbg_modela,honorar);
-
-			if (mysql_query (connection, query) != 0)
-				error_fatal ("Greska u upitu %s\n", mysql_error (connection));
-			
-			printf("Model uspesno zaposlen na reviji!\n");
-		}
-		
-		printf("Da li zelite da modelu dodelite jednu ili vise haljina koje ce nositi tokom revije? da/ne brojhaljina\n");
-		scanf("%s %d", odg, &broj);
-		
-		if(strcmp(odg,"da") == 0){
-			printf("Unesite id revije\n");
-			scanf("%d", &id_revije);
-			for(i = 0; i < broj; i++){
-				printf("Unesite id postojece haljine: ");
-				scanf("%d",&id_haljine);
-				sprintf(query, "INSERT INTO Nosi(Unajmljuje_Model_Osoba_jmbg, Unajmljuje_Modna_revija_id, Haljina_id) VALUES ('%s',%d,%d);", jmbg_modela,id_revije, id_haljine);
-
-				if (mysql_query (connection, query) != 0)
-					error_fatal ("Greska u upitu %s\n", mysql_error (connection));
-			}
-		}
-		
-		mysql_free_result (result);
-		
-	}
-	else if(opcija == 5){
-	//=======================================================================================================================================================	
-
+		else if(opcija == 6){
+			/*Promena mesta odrzavanja revije*/
+		//=======================================================================================================================================================				
 			printf("Unesite id modne revije ciju lokaciju zelite da promenite: \n");
 			scanf("%d", &id_revije);
 			printf("Unesite ptt mesta u kome zelite da se odrzava modna revija:\n");
 			scanf("%d", &ptt);
-			
+					
 			sprintf(query, "UPDATE Modna_revija SET Mesto_odrzavanja_ptt = %d WHERE id = %d;", ptt, id_revije);
 
 			if (mysql_query (connection, query) != 0)
 				error_fatal ("Greska u upitu %s\n", mysql_error (connection));
-		
-	}
-	else if(opcija == 6){
-		printf("Unesite id revije za koju zelite spisak modela: ");
-		scanf("%d", &id_revije);
-		
-		sprintf(query, "SELECT o.ime AS `ime modela`, o.prezime AS `prezime modela`, o.jmbg AS `jmbg modela` FROM Model m JOIN Osoba o ON m.Osoba_jmbg = o.jmbg JOIN Unajmljuje u ON u.Model_Osoba_jmbg = m.Osoba_jmbg WHERE u.Modna_revija_id = %d", id_revije);
-		
-		if (mysql_query (connection, query) != 0)
-			error_fatal ("Greska u upitu %s\n", mysql_error (connection));
-		
-		result = mysql_use_result (connection);
-		
-		field = mysql_fetch_field (result);
-		for(i = 0; i < mysql_field_count(connection); i++){
-			printf("%-20s", field[i].name);
+			printf("Mesto uspesno promenjeno \n");
 		}
-		printf("\n");
-		while ((row = mysql_fetch_row (result)) != 0){
-			for(i = 0; i < mysql_field_count(connection); i++){	
-				printf ("%-20s", row[i]);
-			}
-			printf ("\n");
+		else if(opcija == 7){
+			break;
 		}
-
-		mysql_free_result (result);
+		else{
+			printf("Morate navesti neku validnu opciju!");
+		}
 	}
-	else if(opcija == 7){
-		mysql_close(connection);
-		exit (EXIT_SUCCESS);
-	}
-	else{
-		printf("Morate navesti neku validnu opciju!");
-		mysql_close(connection);
-		exit(EXIT_FAILURE);
-	}
-}
 	mysql_close(connection);
 
 return 0;
