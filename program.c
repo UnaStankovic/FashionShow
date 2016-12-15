@@ -26,6 +26,7 @@ int main(int argc, char* argv[])
 	MYSQL_ROW row;
 	MYSQL_FIELD *field;
 	
+	//names are in serbian because project and database are done so
 	int i;
 	int opcija;
 	int id_kolekcije;
@@ -59,12 +60,12 @@ int main(int argc, char* argv[])
 	while(1){
 		
 		printf("Odaberite sta zelite:\n");
-		printf("1. Spisak gostiju na odredjenoj reviji\n2. Spisak i informacije o reviji na kojima je predstavljena odredjena kolekcija\n3. Spisak modela na odredjenoj reviji\n");
-		printf("4. Unos novih modela, unajmljivanje modela, dodela haljina\n5.Dostupne haljine za odredjenu kolekciju\n6. Promena mesta odrzavanja revije\n7. Izlaz\n");
+		printf("1. Spisak gostiju na odredjenoj reviji\n2. Spisak i informacije o revijama na kojima je predstavljena odredjena kolekcija\n3. Spisak modela na odredjenoj reviji\n");
+		printf("4. Unos novih modela, unajmljivanje modela, dodela haljina\n5. Lista haljina koje su deo odredjene kolekcije\n6. Promena mesta odrzavanja revije\n7. Izlaz\n");
 		scanf("%d", &opcija);
 		
 		if(opcija == 1){
-			/*Spisak gostiju na odredjenoj reviji*/
+			/*List of guests on certain show, id of the show wanted is provided by the user*/
 	//=======================================================================================================================================================			
 			printf("Unesite id revije za koju zelite spisak gostiju: ");
 			scanf("%d", &id_revije);
@@ -92,7 +93,7 @@ int main(int argc, char* argv[])
 			
 		}
 		else if(opcija == 2){
-			/*Spisak i informacije o reviji na kojima je predstavljena odredjena kolekcija*/
+			/*List and info about the shows where the collection of user's input id is presented */
 	//=======================================================================================================================================================			
 			printf("Unesite id kolekcije za informacije o revijama na kojima je kolekcija predstavljana: ");
 			scanf("%d", &id_kolekcije2);
@@ -120,7 +121,7 @@ int main(int argc, char* argv[])
 			
 		}
 		else if(opcija == 3){
-			/*Spisak modela na odredjenoj reviji*/
+			/*List of models participating in a show*/
 	//=======================================================================================================================================================	
 			printf("Unesite id revije za koju zelite spisak modela: ");
 			scanf("%d", &id_revije);
@@ -148,7 +149,7 @@ int main(int argc, char* argv[])
 	
 		}
 		else if(opcija == 4){
-			/* Unos novih modela, unajmljivanje modela, dodela haljina*/
+			/* Data filling for new models and/or contracting the model for a show and/or giving a dress to the model who's personal id num is provided by the user*/
 		//=======================================================================================================================================================	
 				printf("Unesite jmbg modela:");
 				scanf("%s", jmbg_modela);
@@ -235,9 +236,9 @@ int main(int argc, char* argv[])
 			
 		}
 		else if(opcija == 5){
-			/*Dostupne haljine za odredjenu kolekciju*/
+			/*Shows the dresses that are part of certain collections*/
 	//=======================================================================================================================================================	
-			printf("Unesite id kolekcije i godinu kolekcije za informacije o haljinama dostupnim: ");
+			printf("Unesite id kolekcije i godinu kolekcije za informacije o haljinama koje je cine: ");
 			scanf("%d %d", &id_kolekcije, &god_kolekcije);
 
 			sprintf(query, "SELECT h.id AS `id haljine`, d.ime AS `ime dizajnera`, d.prezime AS `prezime dizajnera` FROM Haljina h JOIN Kolekcija k ON k.id = h.Kolekcija_id JOIN Osoba d ON d.jmbg = h.Dizajner_Osoba_jmbg WHERE k.id = %d AND k.godina = %d;", id_kolekcije, god_kolekcije);
@@ -263,7 +264,7 @@ int main(int argc, char* argv[])
 	
 		}
 		else if(opcija == 6){
-			/*Promena mesta odrzavanja revije*/
+			/*Changing of fashion show venue*/
 		//=======================================================================================================================================================				
 			printf("Unesite id modne revije ciju lokaciju zelite da promenite: \n");
 			scanf("%d", &id_revije);
