@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 	
 	connection = mysql_init(NULL);
 
-	if(mysql_real_connect(connection, "localhost","root","MilosUna1903","modna_revija",0, NULL,0) == NULL)
+	if(mysql_real_connect(connection, "localhost","root","","modna_revija",0, NULL,0) == NULL)
 		error_fatal ("Greska u konekciji. %s\n", mysql_error (connection));
 	
 	while(1){
